@@ -1,6 +1,8 @@
 import requests
 
-from models import Match
+from datetime import datetime, time
+
+from models import Match, get_oldest_match_id
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -61,3 +63,29 @@ class CollectorMatch:
             return True
         
         return False
+    
+
+    def collect_matches_until(self, date=None, from_history=True):
+        last_id = None
+
+        if from_history:
+            last_id = get_oldest_match_id(self.engine)
+
+        match_date = datetime.now().strftime("%Y-%m-%d")
+
+        while date <= match_date:
+            response = self.get_matches(less_than_match_id=last_id)
+
+            if response.status_code != 200:
+                time.sleep(60)
+                continue
+                
+            matches = response.json()
+            self.save_matches(matches)
+            older_match = matches[-1]
+
+            match_date = datetime.fromtimestamp(older_match["start_time"]).strftime("%Y-%m-%d")
+
+            last_id = older_match["match_id"]
+        
+        return True
