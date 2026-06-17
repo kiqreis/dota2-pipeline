@@ -1,4 +1,5 @@
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+from sqlalchemy import func, select
+from sqlalchemy.orm import DeclarativeBase, Mapped, Session, mapped_column
 from typing import Optional
 
 
@@ -26,3 +27,10 @@ class Match(Base):
     version: Mapped[Optional[int]] = mapped_column(nullable=True)
     flag_details_collected: Mapped[bool] = mapped_column(default=False)
     flag_details_processed: Mapped[bool] = mapped_column(default=False)
+
+
+def get_oldest_match_id(engine):
+    with Session(engine) as session:
+        match_id = session.scalar(select(func.min(Match.match_id)))
+
+    return match_id
