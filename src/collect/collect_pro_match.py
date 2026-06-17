@@ -17,6 +17,25 @@ class CollectorMatch:
 
         return response
 
+    def update_matches(self, d, i):
+        d.match_id = i["match_id"]
+        d.duration = i["duration"]
+        d.start_time = i["start_time"]
+        d.radiant_team_id = i["radiant_team_id"]
+        d.radiant_name = i["radiant_name"]
+        d.dire_team_id = i["dire_team_id"]
+        d.dire_name = i["dire_name"]
+        d.leagueid = i["leagueid"]
+        d.league_name = i["league_name"]
+        d.series_id = i["series_id"]
+        d.series_type = i["series_type"]
+        d.radiant_score = i["radiant_score"]
+        d.dire_score = i["dire_score"]
+        d.radiant_win = i["radiant_win"]
+        d.version = i["version"]
+
+        return d
+
     def save_matches(self, data):
         with Session(self.engine) as session:
             matches = []
@@ -32,5 +51,3 @@ class CollectorMatch:
 
             session.add_all(matches)
             session.commit()
-
-    
