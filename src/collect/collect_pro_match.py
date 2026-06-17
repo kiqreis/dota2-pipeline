@@ -51,3 +51,13 @@ class CollectorMatch:
 
             session.add_all(matches)
             session.commit()
+
+    def collect_matches(self):
+        response = self.get_matches()
+
+        if response.status_code == 200:
+            self.save_matches(response.json())
+
+            return True
+        
+        return False
