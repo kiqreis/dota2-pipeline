@@ -1,6 +1,8 @@
 import requests
 
 from datetime import datetime, time
+
+from sqlalchemy import select
 from src.db.session import get_session
 from src.collect.models import Match, get_oldest_match_id
 
@@ -16,39 +18,18 @@ class CollectorMatch:
 
         return response
 
-    def update_matches(self, d, i):
-        d.match_id = i["match_id"]
-        d.duration = i["duration"]
-        d.start_time = i["start_time"]
-        d.radiant_team_id = i["radiant_team_id"]
-        d.radiant_name = i["radiant_name"]
-        d.dire_team_id = i["dire_team_id"]
-        d.dire_name = i["dire_name"]
-        d.leagueid = i["leagueid"]
-        d.league_name = i["league_name"]
-        d.series_id = i["series_id"]
-        d.series_type = i["series_type"]
-        d.radiant_score = i["radiant_score"]
-        d.dire_score = i["dire_score"]
-        d.radiant_win = i["radiant_win"]
-        d.version = i["version"]
-
-        return d
-
     def save_matches(self, data):
         with get_session() as session:
-            matches = []
+            ids = [i["match_id"] for i in data]
 
-            for i in data:
-                one_match = session.get(Match, i["match_id"])
-                if one_match:
-                    one_match = self.update_matches(one_match, i)
-                else:
-                    one_match = Match(**i)
+            stmt = select(Match.match_id).where(Match.match_id.in_(ids))
+            existing_ids = set(session.scalars(stmt).all())
 
-                matches.append(one_match)
+            new_matches = [
+                Match(**i) for i in data if i["match_id"] not in existing_ids
+            ]
 
-            session.add_all(matches)
+            session.add_all(new_matches)
 
     def collect_matches(self):
         response = self.get_matches()
@@ -86,8 +67,3 @@ class CollectorMatch:
             last_id = older_match["match_id"]
 
         return True
-
-
-collector = CollectorMatch()
-# print(collector.get_matches().json()[:1])
-collector.collect_matches()
