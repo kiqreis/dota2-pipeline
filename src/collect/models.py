@@ -1,6 +1,8 @@
 from sqlalchemy import func, select
-from sqlalchemy.orm import DeclarativeBase, Mapped, Session, mapped_column
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from typing import Optional
+
+from db.session import get_session
 
 
 class Base(DeclarativeBase):
@@ -8,7 +10,7 @@ class Base(DeclarativeBase):
 
 
 class Match(Base):
-    __tablename__ = "match"
+    __tablename__ = "matches"
 
     match_id: Mapped[int] = mapped_column(primary_key=True)
     duration: Mapped[int]
@@ -29,8 +31,8 @@ class Match(Base):
     flag_details_processed: Mapped[bool] = mapped_column(default=False)
 
 
-def get_oldest_match_id(engine):
-    with Session(engine) as session:
+def get_oldest_match_id():
+    with get_session() as session:
         match_id = session.scalar(select(func.min(Match.match_id)))
 
     return match_id

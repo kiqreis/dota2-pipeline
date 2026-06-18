@@ -1,10 +1,8 @@
 import requests
 
 from datetime import datetime, time
-
+from db.session import get_session
 from models import Match, get_oldest_match_id
-from sqlalchemy import select
-from sqlalchemy.orm import Session
 
 URL = "https://api.opendota.com/api/proMatches"
 
@@ -39,7 +37,7 @@ class CollectorMatch:
         return d
 
     def save_matches(self, data):
-        with Session(self.engine) as session:
+        with get_session() as session:
             matches = []
 
             for i in data:
@@ -52,7 +50,6 @@ class CollectorMatch:
                 matches.append(one_match)
 
             session.add_all(matches)
-            session.commit()
 
     def collect_matches(self):
         response = self.get_matches()
@@ -61,9 +58,8 @@ class CollectorMatch:
             self.save_matches(response.json())
 
             return True
-        
+
         return False
-    
 
     def collect_matches_until(self, date=None, from_history=True):
         last_id = None
@@ -79,13 +75,15 @@ class CollectorMatch:
             if response.status_code != 200:
                 time.sleep(60)
                 continue
-                
+
             matches = response.json()
             self.save_matches(matches)
             older_match = matches[-1]
 
-            match_date = datetime.fromtimestamp(older_match["start_time"]).strftime("%Y-%m-%d")
+            match_date = datetime.fromtimestamp(older_match["start_time"]).strftime(
+                "%Y-%m-%d"
+            )
 
             last_id = older_match["match_id"]
-        
+
         return True
