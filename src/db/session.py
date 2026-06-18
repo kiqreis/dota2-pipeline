@@ -4,7 +4,7 @@ from typing import Generator
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, sessionmaker
 
-from shared.settings import Settings
+from src.shared.settings import Settings
 
 settings = Settings()
 engine = create_engine(settings.DATABASE_URL, pool_pre_ping=True)

@@ -1,15 +1,14 @@
 import requests
 
 from datetime import datetime, time
-from db.session import get_session
+from src.db.session import get_session
 from models import Match, get_oldest_match_id
 
 URL = "https://api.opendota.com/api/proMatches"
 
 
 class CollectorMatch:
-    def __init__(self, engine):
-        self.engine = engine
+    def __init__(self):
         self.url = URL
 
     def get_matches(self, **kwargs):
@@ -87,3 +86,6 @@ class CollectorMatch:
             last_id = older_match["match_id"]
 
         return True
+
+
+collector = CollectorMatch()

@@ -2,7 +2,7 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from typing import Optional
 
-from db.session import get_session
+from src.db.session import get_session
 
 
 class Base(DeclarativeBase):
