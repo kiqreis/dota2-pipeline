@@ -1,4 +1,4 @@
-from sqlalchemy import func, select
+from sqlalchemy import BigInteger, func, select
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from typing import Optional
 
@@ -12,14 +12,14 @@ class Base(DeclarativeBase):
 class Match(Base):
     __tablename__ = "matches"
 
-    match_id: Mapped[int] = mapped_column(primary_key=True)
+    match_id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
     duration: Mapped[int]
     start_time: Mapped[int]
-    radiant_team_id: Mapped[Optional[int]] = mapped_column(nullable=True)
+    radiant_team_id: Mapped[Optional[int]] = mapped_column(BigInteger, nullable=True)
     radiant_name: Mapped[Optional[str]] = mapped_column(nullable=True)
-    dire_team_id: Mapped[Optional[int]] = mapped_column(nullable=True)
+    dire_team_id: Mapped[Optional[int]] = mapped_column(BigInteger, nullable=True)
     dire_name: Mapped[Optional[str]] = mapped_column(nullable=True)
-    leagueid: Mapped[Optional[int]] = mapped_column(nullable=False)
+    leagueid: Mapped[Optional[int]] = mapped_column(BigInteger, nullable=False)
     league_name: Mapped[Optional[str]] = mapped_column(nullable=False)
     series_id: Mapped[Optional[int]] = mapped_column(nullable=True)
     series_type: Mapped[Optional[int]] = mapped_column(nullable=True)

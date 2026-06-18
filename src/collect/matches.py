@@ -2,7 +2,7 @@ import requests
 
 from datetime import datetime, time
 from src.db.session import get_session
-from models import Match, get_oldest_match_id
+from src.collect.models import Match, get_oldest_match_id
 
 URL = "https://api.opendota.com/api/proMatches"
 
@@ -89,3 +89,5 @@ class CollectorMatch:
 
 
 collector = CollectorMatch()
+# print(collector.get_matches().json()[:1])
+collector.collect_matches()
