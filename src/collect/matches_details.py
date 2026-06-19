@@ -31,3 +31,9 @@ class CollectorMatchDetails:
         result = self.mongo_collection.insert_one(data)
 
         return result
+
+    def update_match_as_collected(self, match_collected):
+        with get_session() as session:
+            match_collected.flag_details_collected = True
+
+            session.add(match_collected)
