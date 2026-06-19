@@ -25,3 +25,9 @@ class CollectorMatchDetails:
         response = requests.get(f"{URL}/{match_id}")
 
         return response
+
+    def insert_match_mongo(self, data):
+        result = self.mongo_collection.delete_one({"match_id": data["match_id"]})
+        result = self.mongo_collection.insert_one(data)
+
+        return result
