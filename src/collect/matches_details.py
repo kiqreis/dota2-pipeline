@@ -1,4 +1,5 @@
 import requests
+import time
 from sqlalchemy import select
 
 from src.db.mongo import mongo_client
@@ -37,3 +38,14 @@ class CollectorMatchDetails:
             match_collected.flag_details_collected = True
 
             session.add(match_collected)
+
+    def exec_one(self, match_collected):
+        response = self.get_match_details(match_collected.match_id)
+
+        if response.status_code != 200:
+            return False
+
+        self.insert_match_mongo(response.json())
+        self.update_match_as_collected(match_collected)
+
+        return True
