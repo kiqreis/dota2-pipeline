@@ -49,3 +49,14 @@ class CollectorMatchDetails:
         self.update_match_as_collected(match_collected)
 
         return True
+
+    def exec_all(self):
+        matches = self.get_matches_to_collect()
+
+        for match in matches:
+            success = self.exec_one(match)
+
+            if not success:
+                time.sleep(60)
+            else:
+                time.sleep(1.1)
