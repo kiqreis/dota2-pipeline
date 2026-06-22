@@ -23,13 +23,15 @@ class CollectorMatchDetails:
             return matches_to_collect
 
     def get_match_details(self, match_id):
-        response = requests.get(f"{URL}/{match_id}")
+        response = requests.get(f"{URL}/{match_id}", timeout=30)
 
         return response
 
     def insert_match_mongo(self, data):
-        result = self.mongo_collection.delete_one({"match_id": data["match_id"]})
-        result = self.mongo_collection.insert_one(data)
+        match_id = data["match_id"]
+        result = self.mongo_collection.update_one(
+            {"match_id": match_id}, {"$setOnInsert": data}, upsert=True
+        )
 
         return result
 

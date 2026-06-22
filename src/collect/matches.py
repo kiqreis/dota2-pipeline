@@ -14,7 +14,7 @@ class CollectorMatch:
         self.url = URL
 
     def get_matches(self, **kwargs):
-        response = requests.get(self.url, params=kwargs)
+        response = requests.get(self.url, params=kwargs, timeout=30)
 
         return response
 
@@ -42,10 +42,14 @@ class CollectorMatch:
         return False
 
     def collect_matches_until(self, date=None, from_history=True):
+        if date is None:
+            today = datetime.today()
+            date = today.replace(day=1).strftime("%Y-%m-%d")
+
         last_id = None
 
         if from_history:
-            last_id = get_oldest_match_id(self.engine)
+            last_id = get_oldest_match_id()
 
         match_date = datetime.now().strftime("%Y-%m-%d")
 
