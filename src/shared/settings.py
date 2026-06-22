@@ -1,3 +1,4 @@
+from pydantic import Json
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -9,3 +10,4 @@ class Settings(BaseSettings):
     DATABASE_URL: str
     MONGO_DB_URI: str
     MONGO_DB_NAME: str
+    PROXIES: Json[list[dict[str, str]]]
