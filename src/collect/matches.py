@@ -1,20 +1,29 @@
+import random
+
 import requests
 
-from datetime import datetime, time
+from datetime import datetime
+import time
 
 from sqlalchemy import select
+from src.shared.settings import Settings
 from src.db.session import get_session
 from src.collect.models import Match, get_oldest_match_id
 
 URL = "https://api.opendota.com/api/proMatches"
 
+settings = Settings()
+PROXIES = settings.PROXIES
+
 
 class CollectorMatch:
     def __init__(self):
         self.url = URL
+        self.proxies = PROXIES
 
     def get_matches(self, **kwargs):
-        response = requests.get(self.url, params=kwargs, timeout=30)
+        endopoint = random.choice(self.proxies)
+        response = requests.get(self.url, params=kwargs, timeout=30, proxies=endopoint)
 
         return response
 
@@ -43,17 +52,11 @@ class CollectorMatch:
 
     def collect_matches_until(self, date=None, from_history=True):
         if date is None:
-            today = datetime.today()
-            date = today.replace(day=1).strftime("%Y-%m-%d")
+            date = datetime.today().strftime("%Y-%m-%d")
 
-        last_id = None
+        last_id = get_oldest_match_id() if from_history else None
 
-        if from_history:
-            last_id = get_oldest_match_id()
-
-        match_date = datetime.now().strftime("%Y-%m-%d")
-
-        while date <= match_date:
+        while True:
             response = self.get_matches(less_than_match_id=last_id)
 
             if response.status_code != 200:
@@ -61,13 +64,29 @@ class CollectorMatch:
                 continue
 
             matches = response.json()
-            self.save_matches(matches)
-            older_match = matches[-1]
+            valid_matches = []
 
-            match_date = datetime.fromtimestamp(older_match["start_time"]).strftime(
+            for match in matches:
+                match_day = datetime.fromtimestamp(match["start_time"]).strftime(
+                    "%Y-%m-%d"
+                )
+
+                if match_day < date:
+                    break
+
+                valid_matches.append(match)
+
+            self.save_matches(valid_matches)
+
+            oldest_match = matches[-1]
+
+            oldest_day = datetime.fromtimestamp(oldest_match["start_time"]).strftime(
                 "%Y-%m-%d"
             )
 
-            last_id = older_match["match_id"]
+            if oldest_day < date:
+                break
+
+            last_id = oldest_match["match_id"]
 
         return True

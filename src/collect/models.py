@@ -33,6 +33,6 @@ class Match(Base):
 
 def get_oldest_match_id():
     with get_session() as session:
-        match_id = session.scalar(select(func.max(Match.match_id)))
+        match_id = session.scalar(select(func.min(Match.match_id)))
 
     return match_id
