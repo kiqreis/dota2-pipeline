@@ -54,3 +54,7 @@ class MatchDetailsProcessor:
         data_process = {k: data.get(k) for k in columns}
 
         return pd.DataFrame([pd.Series(data_process)[columns]])
+
+    def save_match_details(self, df):
+        match_id = df["match_id"].iloc[0]
+        df.to_parquet(f"data/match_details/{match_id}.parquet", index=False)
