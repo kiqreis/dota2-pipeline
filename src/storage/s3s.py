@@ -21,7 +21,7 @@ class S3S:
         self.s3 = s3
         self.data_path = "/data"
 
-    def upload_files(self, folder_name, batch_size=10_000):
+    def upload_folder(self, folder_name, batch_size=10_000):
         folder = os.path.join(self.data_path, folder_name)
         files = [i for i in os.listdir(folder) if i.endswith("parquet")]
 
@@ -44,3 +44,7 @@ class S3S:
 
             for i in files_process:
                 files.remove(i)
+
+    def upload_all(self, batch_size=10_000):
+        self.upload_folder("match_details", batch_size=batch_size)
+        self.upload_folder("match_player_details", batch_size=batch_size)
