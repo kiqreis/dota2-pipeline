@@ -187,3 +187,11 @@ class MatchDetailsProcessor:
         self.extract_players_details(df_players)
 
         return True
+
+    def get_matches_to_process(self):
+        with get_session() as session:
+            return session.scalars(
+                select(Match.match_id).where(
+                    Match.flag_details_collected, ~Match.flag_details_processed
+                )
+            ).all()
