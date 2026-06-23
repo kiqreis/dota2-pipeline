@@ -21,8 +21,8 @@ class S3S:
         self.s3 = s3
         self.data_path = "/data"
 
-    def upload_files(self, batch_size=10_000):
-        folder = os.path.join(self.data_path, "match_players_details")
+    def upload_files(self, folder_name, batch_size=10_000):
+        folder = os.path.join(self.data_path, folder_name)
         files = [i for i in os.listdir(folder) if i.endswith("parquet")]
 
         while len(files) > 0:
@@ -31,14 +31,15 @@ class S3S:
             dfs = [pd.read_parquet(os.path.join(folder, i)) for i in files_process]
             df = pd.concat(dfs)
 
-            df.to_parquet("batch_match_player_details.parquet")
+            local_file = f"batch_{folder_name}.parquet"
+            df.to_parquet(local_file)
 
             now = datetime.now().strftime("%Y%m%d_%H%M%S%f")
 
             self.s3.upload_file(
-                "batch_match_player_details.parquet",
+                local_file,
                 "datalake-raw-muci",
-                f"dota2/match_player_details/{now}.parquet",
+                f"dota2/{folder_name}/{now}.parquet",
             )
 
             for i in files_process:
