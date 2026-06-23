@@ -1,4 +1,8 @@
 import pandas as pd
+from sqlalchemy import select
+
+from src.collect.models import Match
+from src.db.session import get_session
 
 
 class MatchDetailsProcessor:
@@ -168,3 +172,18 @@ class MatchDetailsProcessor:
         df = df.reindex(columns=columns_order)
 
         return df
+
+    def save_match_player_details(self, df):
+        match_id = df["match_id"].iloc[0]
+        df.to_parquet(f"data/match_player_details/{match_id}.parquet", index=False)
+
+    def process_match_id(self, match_id):
+        data = self.get_match_details(match_id)
+
+        df_match = self.extract_match_details(data)
+        self.save_match_details(df_match)
+
+        df_players = self.extract_players_details(data)
+        self.extract_players_details(df_players)
+
+        return True
