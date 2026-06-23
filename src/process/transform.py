@@ -195,3 +195,14 @@ class MatchDetailsProcessor:
                     Match.flag_details_collected, ~Match.flag_details_processed
                 )
             ).all()
+
+    def process_all(self):
+        match_ids = self.get_matches_to_process()
+
+        for i in match_ids:
+            if self.process_match_id(match_id=i):
+                with get_session() as session:
+                    m = session.get(Match, i)
+                    if m:
+                        m.flag_details_processed = True
+                        session.add(m)
