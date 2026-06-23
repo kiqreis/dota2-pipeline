@@ -3,6 +3,7 @@ from sqlalchemy import select
 
 from src.collect.models import Match
 from src.db.session import get_session
+from src.db.mongo import match_details_collection
 
 
 class MatchDetailsProcessor:
@@ -184,7 +185,7 @@ class MatchDetailsProcessor:
         self.save_match_details(df_match)
 
         df_players = self.extract_players_details(data)
-        self.extract_players_details(df_players)
+        self.save_match_player_details(df_players)
 
         return True
 
