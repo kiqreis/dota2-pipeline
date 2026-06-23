@@ -11,3 +11,6 @@ class Settings(BaseSettings):
     MONGO_DB_URI: str
     MONGO_DB_NAME: str
     PROXIES: Json[list[dict[str, str]]]
+    AWS_KEY: str
+    AWS_SECRET_KEY: str
+    AWS_REGION: str
