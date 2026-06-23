@@ -1,17 +1,38 @@
-import requests
 import time
+
+import requests
 from sqlalchemy import select
 
-from src.db.mongo import mongo_client
 from src.collect.models import Match
 from src.db.session import get_session
 
 URL = "https://api.opendota.com/api/matches"
 
 
+def sanitize_for_mongo(data):
+    MAX_INT = 9223372036854775807
+
+    if isinstance(data, dict):
+        sanitized = {}
+
+        for k, v in data.items():
+            sanitized_value = sanitize_for_mongo(v)
+
+            if isinstance(sanitized_value, int) and sanitized_value > MAX_INT:
+                sanitized[k] = str(sanitized_value)
+            else:
+                sanitized[k] = sanitized_value
+
+        return sanitized
+
+    elif isinstance(data, list):
+        return [sanitize_for_mongo(i) for i in data]
+
+    return data
+
+
 class CollectorMatchDetails:
-    def __init__(self, sql_engine, mongo_collection):
-        self.sql_engine = sql_engine
+    def __init__(self, mongo_collection):
         self.mongo_collection = mongo_collection
 
     def get_matches_to_collect(self):
@@ -28,27 +49,31 @@ class CollectorMatchDetails:
         return response
 
     def insert_match_mongo(self, data):
+        sanitized_data = sanitize_for_mongo(data)
+
         match_id = data["match_id"]
         result = self.mongo_collection.update_one(
-            {"match_id": match_id}, {"$setOnInsert": data}, upsert=True
+            {"match_id": match_id}, {"$setOnInsert": sanitized_data}, upsert=True
         )
 
         return result
 
-    def update_match_as_collected(self, match_collected):
+    def update_match_as_collected(self, match_id):
         with get_session() as session:
-            match_collected.flag_details_collected = True
+            match = session.get(Match, match_id)
 
-            session.add(match_collected)
+            if match:
+                match.flag_details_collected = True
 
     def exec_one(self, match_collected):
-        response = self.get_match_details(match_collected.match_id)
+        match_id = match_collected.match_id
+        response = self.get_match_details(match_id)
 
         if response.status_code != 200:
             return False
 
         self.insert_match_mongo(response.json())
-        self.update_match_as_collected(match_collected)
+        self.update_match_as_collected(match_id)
 
         return True
 
