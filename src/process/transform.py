@@ -3,7 +3,6 @@ from sqlalchemy import select
 
 from src.collect.models import Match
 from src.db.session import get_session
-from src.db.mongo import match_details_collection
 
 
 class MatchDetailsProcessor:
@@ -56,9 +55,15 @@ class MatchDetailsProcessor:
             "region",
         ]
 
+        mixeds_columns = ["radiant_logo", "dire_logo"]
         data_process = {k: data.get(k) for k in columns}
+        df = pd.DataFrame([data_process])
 
-        return pd.DataFrame([pd.Series(data_process)[columns]])
+        for column in mixeds_columns:
+            if column in df.columns:
+                df[column] = df[column].astype(str)
+
+        return df[columns]
 
     def save_match_details(self, df):
         match_id = df["match_id"].iloc[0]
