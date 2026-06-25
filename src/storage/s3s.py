@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 import pandas as pd
 import boto3
 
@@ -6,11 +7,14 @@ from datetime import datetime
 
 from src.shared.settings import Settings
 
+BASE_DIR = Path(__file__).parent.parent.parent
+FOLDER_PATH = BASE_DIR / "data"
+
 settings = Settings()
 
 s3_client = boto3.client(
     "s3",
-    aws_access_key=settings.AWS_KEY,
+    aws_access_key_id=settings.AWS_KEY,
     aws_secret_access_key=settings.AWS_SECRET_KEY,
     region_name=settings.AWS_REGION,
 )
@@ -19,7 +23,7 @@ s3_client = boto3.client(
 class S3S:
     def __init__(self, s3):
         self.s3 = s3
-        self.data_path = "/data"
+        self.data_path = FOLDER_PATH
 
     def upload_folder(self, folder_name, batch_size=10_000):
         folder = os.path.join(self.data_path, folder_name)
