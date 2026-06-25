@@ -42,8 +42,12 @@ class S3S:
                 f"dota2/{folder_name}/{now}.parquet",
             )
 
+            os.remove(local_file)
+
             for i in files_process:
-                files.remove(i)
+                os.remove(os.path.join(folder, i))
+
+            files = files[batch_size:]
 
     def upload_all(self, batch_size=10_000):
         self.upload_folder("match_details", batch_size=batch_size)
