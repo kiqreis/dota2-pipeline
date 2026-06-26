@@ -61,7 +61,7 @@ class MatchDetailsProcessor:
 
         for column in mixeds_columns:
             if column in df.columns:
-                df[column] = df[column].astype(str)
+                df[column] = df[column].astype("string")
 
         return df[columns]
 
