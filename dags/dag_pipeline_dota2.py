@@ -1,63 +1,78 @@
 from datetime import datetime
 
-import boto3
-
-from airflow import DAG
-from airflow.operators.python import PythonOperator
+from airflow.decorators import dag, task
 
 
-def run_collect_matches():
-    from src.collect.matches import CollectorMatch
-
-    collector = CollectorMatch()
-    collector.collect_matches_until(date="2026-06-24", from_history=True)
-
-
-def run_collect_matches_details():
-    from src.collect.matches_details import CollectorMatchDetails
-    from src.db.mongo import match_details_collection
-
-    collector = CollectorMatchDetails(match_details_collection)
-    collector.exec_all()
-
-
-def run_processor():
-    from src.process.transform import MatchDetailsProcessor
-    from src.db.mongo import match_details_collection
-
-    processor = MatchDetailsProcessor(match_details_collection)
-    processor.process_all()
-
-
-def run_sender():
-    from src.storage.s3s import S3S
-    from src.shared.settings import Settings
-
-    settings = Settings()
-    client = boto3.client(
-        "s3",
-        aws_access_key_id=settings.AWS_KEY,
-        aws_secret_access_key=settings.AWS_SECRET_KEY,
-        region_name=settings.AWS_REGION,
-    )
-
-    sender = S3S(client)
-    sender.upload_all()
-
-
-with DAG(
+@dag(
     dag_id="pipeline_dota2",
     start_date=datetime(2025, 1, 1),
     schedule="0 2 * * *",
     catchup=False,
     tags=["dota2"],
-) as dag:
+    params={"target_date": "2026-06-27", "from_history": True},
+)
+def pipeline_dota2():
+    @task(task_id="collect_matches")
+    def collect_matches(**ctx):
+        from src.collect.matches import CollectorMatch
 
-    t1 = PythonOperator(task_id="collect_matches", python_callable=run_collect_matches)
-    t2 = PythonOperator(
-        task_id="collect_matches_details", python_callable=run_collect_matches_details
+        collector = CollectorMatch()
+
+        target_date = ctx["params"]["target_date"]
+        from_history = ctx["params"]["from_history"]
+
+        collector.collect_matches_until(date=target_date, from_history=from_history)
+
+    @task(task_id="collect_matches_details")
+    def collect_matches_details(**ctx):
+        from src.collect.matches_details import CollectorMatchDetails
+        from src.shared.settings import Settings
+        from pymongo import MongoClient
+
+        settings = Settings()
+        client = MongoClient(settings.MONGO_DB_URI)
+        collection = client.get_database(settings.MONGO_DB_NAME).get_collection(
+            "match_details"
+        )
+
+        collector = CollectorMatchDetails(collection)
+
+        collector.exec_all()
+
+    @task(task_id="process_transform")
+    def process_transform(**ctx):
+        from src.process.transform import MatchDetailsProcessor
+        from src.shared.settings import Settings
+        from pymongo import MongoClient
+
+        settings = Settings()
+        client = MongoClient(settings.MONGO_DB_URI)
+
+        collection = client.get_database(settings.MONGO_DB_NAME).get_collection(
+            "match_details"
+        )
+
+        processor = MatchDetailsProcessor(collection)
+
+        processor.process_all()
+
+    @task(task_id="send_to_s3")
+    def send_to_s3(**ctx):
+        from src.storage.s3s import S3S
+        from airflow.providers.amazon.aws.hooks.s3 import S3Hook
+
+        s3_hook = S3Hook(aws_conn_id="aws_default")
+        sender = S3S(s3=s3_hook.get_conn())
+
+        batch_size = ctx["params"].get("batch_size", 100_000)
+        sender.upload_all(batch_size=batch_size)
+
+    (
+        collect_matches()
+        >> collect_matches_details()
+        >> process_transform()
+        >> send_to_s3()
     )
-    t3 = PythonOperator(task_id="process_transform", python_callable=run_processor)
-    t4 = PythonOperator(task_id="send_to_s3", python_callable=run_sender)
 
-    t1 >> t2 >> t3 >> t4
+
+dag_run = pipeline_dota2()

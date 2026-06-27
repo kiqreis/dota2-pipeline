@@ -10,3 +10,5 @@ pyarrow
 fastparquet
 pydantic
 pydantic-settings
+apache-airflow-providers-mongo
+apache-airflow-providers-amazon
