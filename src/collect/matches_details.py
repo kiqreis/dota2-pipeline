@@ -50,11 +50,7 @@ class CollectorMatchDetails:
 
     def insert_match_mongo(self, data):
         sanitized_data = sanitize_for_mongo(data)
-
-        match_id = data["match_id"]
-        result = self.mongo_collection.update_one(
-            {"match_id": match_id}, {"$setOnInsert": sanitized_data}, upsert=True
-        )
+        result = self.mongo_collection.insert_one(sanitized_data)
 
         return result
 
