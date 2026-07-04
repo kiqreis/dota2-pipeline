@@ -1,12 +1,18 @@
+import random
 import time
 
 import requests
 from sqlalchemy import select
 
+from src.shared.settings import Settings
 from src.collect.models import Match
 from src.db.session import get_session
 
 URL = "https://api.opendota.com/api/matches"
+
+
+settings = Settings()
+PROXIES = settings.PROXIES
 
 
 def sanitize_for_mongo(data):
@@ -34,6 +40,7 @@ def sanitize_for_mongo(data):
 class CollectorMatchDetails:
     def __init__(self, mongo_collection):
         self.mongo_collection = mongo_collection
+        self.proxies = PROXIES
 
     def get_matches_to_collect(self):
         with get_session() as session:
@@ -44,7 +51,8 @@ class CollectorMatchDetails:
             return matches_to_collect
 
     def get_match_details(self, match_id):
-        response = requests.get(f"{URL}/{match_id}", timeout=30)
+        endpoints = random.choice(self.proxies)
+        response = requests.get(f"{URL}/{match_id}", timeout=30, proxies=endpoints)
 
         return response
 
