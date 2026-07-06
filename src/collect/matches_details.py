@@ -11,7 +11,7 @@ import time
 import requests
 from sqlalchemy import select
 
-from src.shared.settings import Settings
+from src.shared.settings import Settings, RateLimitException
 from src.collect.models import Match
 from src.db.session import get_session
 
@@ -21,14 +21,8 @@ URL = "https://api.opendota.com/api/matches"
 settings = Settings()
 PROXIES = settings.PROXIES
 
-MAX_REQUESTS_PER_MINUTE_PER_PROXY = 60
+MAX_REQUESTS_PER_MINUTE = 60
 WINDOW_SECONDS = 60.0
-
-
-class RateLimitException(Exception):
-    def __init__(self, retry_after=5):
-        self.retry_after = retry_after
-        super().__init__(f"Rate limit exceeded. Retry after {retry_after} seconds")
 
 
 class ProxyRateLimiter:
@@ -110,7 +104,7 @@ def sanitize_for_mongo(data):
 class CollectorMatchDetails:
     def __init__(self, mongo_collection, max_workers):
         self.mongo_collection = mongo_collection
-        self.proxies = ProxyRouter(PROXIES, MAX_REQUESTS_PER_MINUTE_PER_PROXY)
+        self.proxies = ProxyRouter(PROXIES, MAX_REQUESTS_PER_MINUTE)
         self.max_workers = max_workers or max(1, len(PROXIES) * 2)
 
     def get_matches_to_collect(self):
