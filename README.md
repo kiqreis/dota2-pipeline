@@ -58,7 +58,7 @@ graph LR
 
 ## Arquitetura do Pipeline
 
-![Arquitetura do Pipeline](/assets/architecture_pipeline_dota2.png)
+![Arquitetura do Pipeline](./assets/architecture_pipeline_dota2.png)
 
 ## 1. Coleta de Partidas
 
