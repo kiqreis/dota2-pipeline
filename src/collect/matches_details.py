@@ -1,4 +1,6 @@
+from collections import deque
 import random
+import threading
 import time
 
 import requests
@@ -19,6 +21,31 @@ class RateLimitException(Exception):
     def __init__(self, retry_after=5):
         self.retry_after = retry_after
         super().__init__(f"Rate limit exceeded. Retry after {retry_after} seconds")
+
+
+class ProxyRateLimiter:
+    def __init__(self, max_requests, sliding_window):
+        self.max_requests = max_requests
+        self.sliding_window = sliding_window
+        self._timestamps = deque()
+        self._thread_lock = threading.Lock()
+
+    def wait_for_slot(self):
+        while True:
+            with self._thread_lock:
+                now = time.monotonic()
+
+                while (
+                    self._timestamps and now - self._timestamps[0] > self.sliding_window
+                ):
+                    self._timestamps.popleft()
+
+                if len(self._timestamps) < self.max_requests:
+                    self._timestamps.append(now)
+
+                stop_for = self.sliding_window - (now - self._timestamps[0]) + 0.01
+
+            time.sleep(max(stop_for, 0.01))
 
 
 def sanitize_for_mongo(data):
