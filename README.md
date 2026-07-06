@@ -209,4 +209,4 @@ astro dev start
 
 
 ## Licença
-MIT © 2026 Kaique Reis
+Este projeto está licenciado sob a licença MIT. Consulte o arquivo `LICENSE` para mais informações.
