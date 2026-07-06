@@ -15,6 +15,12 @@ settings = Settings()
 PROXIES = settings.PROXIES
 
 
+class RateLimitException(Exception):
+    def __init__(self, retry_after=5):
+        self.retry_after = retry_after
+        super().__init__(f"Rate limit exceeded. Retry after {retry_after} seconds")
+
+
 def sanitize_for_mongo(data):
     MAX_INT = 9223372036854775807
 
