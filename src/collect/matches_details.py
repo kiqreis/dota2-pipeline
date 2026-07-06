@@ -1,4 +1,9 @@
+from concurrent.futures import ThreadPoolExecutor, as_completed
+
+from pymongo.errors import AutoReconnect
+from tenacity import retry, retry_if_exception_type, stop_after_attempt
 from collections import deque
+import itertools
 import random
 import threading
 import time
@@ -15,6 +20,9 @@ URL = "https://api.opendota.com/api/matches"
 
 settings = Settings()
 PROXIES = settings.PROXIES
+
+MAX_REQUESTS_PER_MINUTE_PER_PROXY = 60
+WINDOW_SECONDS = 60.0
 
 
 class RateLimitException(Exception):
@@ -42,10 +50,39 @@ class ProxyRateLimiter:
 
                 if len(self._timestamps) < self.max_requests:
                     self._timestamps.append(now)
+                    return
 
                 stop_for = self.sliding_window - (now - self._timestamps[0]) + 0.01
 
             time.sleep(max(stop_for, 0.01))
+
+
+class ProxyRouter:
+    def __init__(self, proxies, max_spin: int):
+        if not proxies:
+            raise ValueError("PROXIES está vazio")
+        self._proxies = proxies
+        self._limiters = [ProxyRateLimiter(max_spin, WINDOW_SECONDS) for _ in proxies]
+        self._cycle = itertools.cycle(range(len(proxies)))
+        self._lock = threading.Lock()
+
+    def acquire_proxy(self):
+        with self._lock:
+            i = next(self._cycle)
+        proxy = self._proxies[i]
+        self._limiters[i].wait_for_slot()
+        return proxy, i
+
+
+def _wait_time(retry_state):
+    exec = retry_state.outcome.exception()
+
+    if isinstance(exec, RateLimitException):
+        return exec.retry_after
+
+    base_time = min(30, 2**retry_state.attempt_number)
+
+    return base_time + random.uniform(0, 1)
 
 
 def sanitize_for_mongo(data):
@@ -71,9 +108,10 @@ def sanitize_for_mongo(data):
 
 
 class CollectorMatchDetails:
-    def __init__(self, mongo_collection):
+    def __init__(self, mongo_collection, max_workers):
         self.mongo_collection = mongo_collection
-        self.proxies = PROXIES
+        self.proxies = ProxyRouter(PROXIES, MAX_REQUESTS_PER_MINUTE_PER_PROXY)
+        self.max_workers = max_workers or max(1, len(PROXIES) * 2)
 
     def get_matches_to_collect(self):
         with get_session() as session:
@@ -83,9 +121,29 @@ class CollectorMatchDetails:
 
             return matches_to_collect
 
+    @retry(
+        stop=stop_after_attempt(6),
+        wait=_wait_time,
+        retry=retry_if_exception_type(
+            (
+                requests.RequestException,
+                RateLimitException,
+                ConnectionError,
+                AutoReconnect,
+            )
+        ),
+        reraise=True,
+    )
     def get_match_details(self, match_id):
-        endpoints = random.choice(self.proxies)
+        endpoints, _ = self.proxies.acquire_proxy()
         response = requests.get(f"{URL}/{match_id}", timeout=30, proxies=endpoints)
+
+        if response.status_code == 429:
+            retry_after = response.headers.get("Retry-After", 5)
+            raise RateLimitException(retry_after=retry_after)
+
+        if response.status_code >= 500:
+            response.raise_for_status()
 
         return response
 
@@ -117,10 +175,8 @@ class CollectorMatchDetails:
     def exec_all(self):
         matches = self.get_matches_to_collect()
 
-        for match in matches:
-            success = self.exec_one(match)
+        with ThreadPoolExecutor(max_workers=self.max_workers) as executor:
+            futures = [executor.submit(self.exec_one, m) for m in matches]
 
-            if not success:
-                time.sleep(60)
-            else:
-                time.sleep(1.1)
+            for future in as_completed(futures):
+                future.result()

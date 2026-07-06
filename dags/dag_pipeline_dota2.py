@@ -9,7 +9,7 @@ from airflow.decorators import dag, task
     schedule="0 2 * * *",
     catchup=False,
     tags=["dota2"],
-    params={"target_date": "2026-06-29", "from_history": True},
+    params={"target_date": "2026-07-06", "from_history": True},
 )
 def pipeline_dota2():
     @task(task_id="collect_matches")
@@ -35,7 +35,7 @@ def pipeline_dota2():
             "match_details"
         )
 
-        collector = CollectorMatchDetails(collection)
+        collector = CollectorMatchDetails(collection, max_workers=10)
 
         collector.exec_all()
 
