@@ -22,22 +22,18 @@ O pipeline coleta id's de partidas profissionais da API do OpenDota e os registr
 
 
 ##
-<!-- Core -->
-![Python](https://img.shields.io/badge/Python-3.12+-3776AB?logo=python&logoColor=white)
-![Apache Airflow](https://img.shields.io/badge/Apache%20Airflow-017CEE?logo=apacheairflow&logoColor=white)
-![Docker](https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=white)
-<!-- Storage -->
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?logo=postgresql&logoColor=white)
-![MongoDB](https://img.shields.io/badge/MongoDB-47A248?logo=mongodb&logoColor=white)
-![Delta Lake](https://img.shields.io/badge/Delta%20Lake-00ADD4?logoColor=white)
-<!-- Cloud & Processamento -->
-![Amazon S3](https://img.shields.io/badge/Amazon%20S3-569A31?logo=amazons3&logoColor=white)
-![Amazon EC2](https://img.shields.io/badge/Amazon%20EC2-FF9900?logo=amazonec2&logoColor=white)
-![Airbyte](https://img.shields.io/badge/Airbyte-615EFF?logo=airbyte&logoColor=white)
-![Databricks](https://img.shields.io/badge/Databricks-FF3621?logo=databricks&logoColor=white)
-![PySpark](https://img.shields.io/badge/PySpark-E25A1C?logo=apachespark&logoColor=white)
-
-![License](https://img.shields.io/badge/license-MIT-lightgrey)
+![Python](https://img.shields.io/badge/Python-3.12+-3776AB?logo=python&logoColor=white&style=flat)
+![Airflow](https://img.shields.io/badge/Airflow-017CEE?logo=apacheairflow&logoColor=white&style=flat)
+![Docker](https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=white&style=flat)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?logo=postgresql&logoColor=white&style=flat)
+![MongoDB](https://img.shields.io/badge/MongoDB-47A248?logo=mongodb&logoColor=white&style=flat)
+![Delta Lake](https://img.shields.io/badge/Delta%20Lake-00ADD4?style=flat)
+![S3](https://img.shields.io/badge/S3-569A31?logo=amazons3&logoColor=white&style=flat)
+![EC2](https://img.shields.io/badge/EC2-FF9900?logo=amazonec2&logoColor=white&style=flat)
+![Airbyte](https://img.shields.io/badge/Airbyte-615EFF?logo=airbyte&logoColor=white&style=flat)
+![Databricks](https://img.shields.io/badge/Databricks-FF3621?logo=databricks&logoColor=white&style=flat)
+![PySpark](https://img.shields.io/badge/PySpark-E25A1C?logo=apachespark&logoColor=white&style=flat)
+![MIT](https://img.shields.io/badge/license-MIT-lightgrey&style=flat)
 
 ## Fluxo de Dados
 
