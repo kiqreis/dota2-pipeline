@@ -4,7 +4,40 @@ Este projeto é a implementação de um pipeline de dados completo para coleta, 
 
 ## Visão Geral
 
-O pipeline coleta dados brutos da API do OpenDota, armazena as partidas profissionais num PostreSQL, após isso se utiliza dos id's para buscar os detalhes destas e, à partir disso, enviar apenas detalhes apenas das partidas profissionais ao MongoDB, processa estes dados e os envia para o Amazon S3 para consumo no Databricks através da replicação feita pelo Airbyte.
+Pipeline completo de engenharia de dados para coleta, processamento e análise de partidas profissionais de Dota 2, da API do OpenDota até tabelas analíticas com rigor estatístico no Databricks.
+
+O pipeline coleta id's de partidas profissionais da API do OpenDota e os registra num PostgreSQL transacional para controle de estado. À partir dos id's dessas partidas, busca os detalhes completos das partidas e dos players (apenas as profissionais) documentos JSON extensos e altamente aninhados que são persistidos da forma que chegam no MongoDB. Esses documentos passam por um processamento mínimo, são exportados em Parquet para um bucket S3 e replicados pelo Airbyte para o Databricks, onde seguem a arquitetura medalhão (Bronze → Silver → Gold) com processamento incremental.
+
+## Decisões Arquiteturais
+
+| Decisão | Alternativa considerada | Justificativa |
+|---------|------------------------|---------------|
+| MongoDB para partidas brutas | JSONB no PostgreSQL | Documentos com dezenas de campos aninhados e semi estruturados, dificultando a modelagem relacional o que a tornaria frágil e de manutenção complexa. |
+| PostgreSQL transacional | Apenas MongoDB | Controle de estado e idempotência da coleta (quais partidas já foram processadas), evitando reprocessamento e dados duplicados. |
+| Airbyte (S3 → Databricks) | Auto Loader direto | Streaming tables gerenciadas e abstração da ingestão, aproveitando a detecção de novos arquivos pelo cursor e o suporte a deduplicação por chave primária diretamente no destino. |
+| Parquet no S3 | JSON/CSV | Compressão colunar, schema embutido e leitura otimizada pelo Spark. |
+| Processamento incremental com checkpoints | Full reload | Apenas o batch novo é processado na Silver, reduzindo custo computacional e tempo de execução. |
+| Wilson score nos rankings | Winrate bruto | Intervalo de confiança inferior com penalização de amostras muito pequenas, não favorecendo times com poucas partidas.|
+| Mínimos de amostra (`MIN_GAMES=10`, `MIN_PICKS=20`) | Sem threshold | Filtra ruído estatístico das análises de meta e rankings. |
+
+
+##
+<!-- Core -->
+![Python](https://img.shields.io/badge/Python-3.12+-3776AB?logo=python&logoColor=white)
+![Apache Airflow](https://img.shields.io/badge/Apache%20Airflow-017CEE?logo=apacheairflow&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=white)
+<!-- Storage -->
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?logo=postgresql&logoColor=white)
+![MongoDB](https://img.shields.io/badge/MongoDB-47A248?logo=mongodb&logoColor=white)
+![Delta Lake](https://img.shields.io/badge/Delta%20Lake-00ADD4?logoColor=white)
+<!-- Cloud & Processamento -->
+![Amazon S3](https://img.shields.io/badge/Amazon%20S3-569A31?logo=amazons3&logoColor=white)
+![Amazon EC2](https://img.shields.io/badge/Amazon%20EC2-FF9900?logo=amazonec2&logoColor=white)
+![Airbyte](https://img.shields.io/badge/Airbyte-615EFF?logo=airbyte&logoColor=white)
+![Databricks](https://img.shields.io/badge/Databricks-FF3621?logo=databricks&logoColor=white)
+![PySpark](https://img.shields.io/badge/PySpark-E25A1C?logo=apachespark&logoColor=white)
+
+![License](https://img.shields.io/badge/license-MIT-lightgrey)
 
 ## Fluxo de Dados
 
