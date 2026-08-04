@@ -17,7 +17,7 @@ O pipeline coleta id's de partidas profissionais da API do OpenDota e os registr
 | Airbyte (S3 → Databricks) | Auto Loader direto | Streaming tables gerenciadas e abstração da ingestão, aproveitando a detecção de novos arquivos pelo cursor e o suporte a deduplicação por chave primária diretamente no destino. |
 | Parquet no S3 | JSON/CSV | Compressão colunar, schema embutido e leitura otimizada pelo Spark. |
 | Processamento incremental com checkpoints | Full reload | Apenas o batch novo é processado na Silver, reduzindo custo computacional e tempo de execução. |
-| Wilson score nos rankings | Winrate bruto | Intervalo de confiança inferior com penalização de amostras muito pequenas, não favorecendo times com poucas partidas.|
+| Intervalo de confiança nos rankings | Winrate bruto | Intervalo de confiança inferior com penalização de amostras muito pequenas, não favorecendo times com poucas partidas.|
 | Mínimos de amostra (`MIN_GAMES=10`, `MIN_PICKS=20`) | Sem threshold | Filtra ruído estatístico das análises de meta e rankings. |
 
 
