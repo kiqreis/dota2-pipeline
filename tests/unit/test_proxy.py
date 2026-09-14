@@ -102,3 +102,12 @@ def test_when_each_thread_has_its_own_limiter_then_limit_is_respected(clock):
 def test_when_proxies_list_is_empty_then_raises_value_error():
     with pytest.raises(ValueError, match="Proxies is empty"):
         ProxyRouter([], max_spin=5)
+
+
+def test_acquire_proxy_returns_valid_proxy(clock, proxies):
+    router = ProxyRouter(proxies, max_spin=60)
+
+    proxy, i = router.acquire_proxy()
+
+    assert proxy in proxies
+    assert proxies[i] is proxy
