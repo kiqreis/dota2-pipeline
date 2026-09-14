@@ -111,3 +111,11 @@ def test_acquire_proxy_returns_valid_proxy(clock, proxies):
 
     assert proxy in proxies
     assert proxies[i] is proxy
+
+
+def test_when_acquiring_proxies_twice_then_repeats_sequence(clock, proxies):
+    router = ProxyRouter(proxies, max_spin=60)
+
+    results = [router.acquire_proxy()[0] for _ in range(len(proxies) * 2)]
+
+    assert results[: len(proxies)] == results[len(proxies) :]
