@@ -1,7 +1,7 @@
 import threading
 import pytest
 
-from src.collect.proxy import ProxyRateLimiter
+from src.collect.proxy import ProxyRateLimiter, ProxyRouter
 
 
 class FakeClock:
@@ -97,3 +97,8 @@ def test_when_each_thread_has_its_own_limiter_then_limit_is_respected(clock):
 
     for limiter in limiters:
         assert len(limiter._timestamps) <= 60
+
+
+def test_when_proxies_list_is_empty_then_raises_value_error():
+    with pytest.raises(ValueError, match="Proxies is empty"):
+        ProxyRouter([], max_spin=5)
