@@ -119,3 +119,18 @@ def test_when_acquiring_proxies_twice_then_repeats_sequence(clock, proxies):
     results = [router.acquire_proxy()[0] for _ in range(len(proxies) * 2)]
 
     assert results[: len(proxies)] == results[len(proxies) :]
+
+
+def test_when_proxy_limit_is_reached_then_proxy_waits(clock, proxies):
+    router = ProxyRouter(proxies, max_spin=1)
+
+    acquired = [router.acquire_proxy()[0] for _ in range(len(proxies))]
+
+    assert acquired == proxies
+    assert not clock.sleeps
+
+    proxy, i = router.acquire_proxy()
+
+    assert proxy is proxies[0]
+    assert i == 0
+    assert clock.sleeps
