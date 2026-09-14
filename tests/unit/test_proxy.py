@@ -58,3 +58,13 @@ def test_sleeps_until_window_is_available_when_limit_is_exceeded(clock):
         limiter.wait_for_slot()
 
     assert clock.sleeps == [pytest.approx(0.5, abs=0.02)]
+
+
+def test_when_window_elapsed_then_allows_request(clock):
+    limiter = ProxyRateLimiter(max_requests=1, sliding_window=0.3)
+    limiter.wait_for_slot()
+
+    clock.advance(0.31)
+    limiter.wait_for_slot()
+
+    assert clock.sleeps == []
