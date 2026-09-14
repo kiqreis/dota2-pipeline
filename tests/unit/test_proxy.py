@@ -30,3 +30,11 @@ def clock(monkeypatch):
     monkeypatch.setattr("src.collect.proxy.time.sleep", fake.sleep)
 
     return fake
+
+
+@pytest.fixture
+def proxies():
+    return [
+        {"http": f"http://proxy{i}:8080", "https": f"http://proxy{i}:8080"}
+        for i in range(3)
+    ]
