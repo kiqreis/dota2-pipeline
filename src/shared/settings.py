@@ -14,3 +14,4 @@ class Settings(BaseSettings):
     AWS_KEY: str
     AWS_SECRET_KEY: str
     AWS_REGION: str
+    WINDOW_SECONDS: float = 60.0

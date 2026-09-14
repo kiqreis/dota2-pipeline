@@ -2,8 +2,9 @@ from collections import deque
 import itertools
 import threading
 import time
+from shared.settings import Settings
 
-WINDOW_SECONDS = 60.0
+settings = Settings()
 
 
 class ProxyRateLimiter:
@@ -35,15 +36,20 @@ class ProxyRateLimiter:
 class ProxyRouter:
     def __init__(self, proxies, max_spin: int):
         if not proxies:
-            raise ValueError("PROXIES está vazio")
+            raise ValueError("Proxies is empty")
+
         self._proxies = proxies
-        self._limiters = [ProxyRateLimiter(max_spin, WINDOW_SECONDS) for _ in proxies]
+        self._limiters = [
+            ProxyRateLimiter(max_spin, settings.WINDOW_SECONDS) for _ in proxies
+        ]
         self._cycle = itertools.cycle(range(len(proxies)))
         self._lock = threading.Lock()
 
     def acquire_proxy(self):
         with self._lock:
             i = next(self._cycle)
+
         proxy = self._proxies[i]
         self._limiters[i].wait_for_slot()
+
         return proxy, i
