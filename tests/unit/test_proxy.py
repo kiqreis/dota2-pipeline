@@ -68,3 +68,32 @@ def test_when_window_elapsed_then_allows_request(clock):
     limiter.wait_for_slot()
 
     assert clock.sleeps == []
+
+
+def test_when_each_thread_has_its_own_limiter_then_limit_is_respected(clock):
+    limiters = [
+        ProxyRateLimiter(max_requests=60, sliding_window=60.0) for _ in range(3)
+    ]
+    errors = []
+
+    def worker(limiter):
+        try:
+            for _ in range(90):
+                limiter.wait_for_slot()
+        except Exception as e:
+            errors.append(e)
+
+    threads = [
+        threading.Thread(target=worker, args=(limiters[i % 3],)) for i in range(3)
+    ]
+
+    for t in threads:
+        t.start()
+
+    for t in threads:
+        t.join()
+
+    assert not errors
+
+    for limiter in limiters:
+        assert len(limiter._timestamps) <= 60
