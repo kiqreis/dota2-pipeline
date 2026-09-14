@@ -1,4 +1,5 @@
 import threading
+import pytest
 
 
 class FakeClock:
@@ -19,3 +20,13 @@ class FakeClock:
     def advance(self, seconds):
         with self._lock:
             self.now += seconds
+
+
+@pytest.fixture
+def clock(monkeypatch):
+    fake = FakeClock()
+
+    monkeypatch.setattr("src.collect.proxy.time.monotonic", fake.monotonic)
+    monkeypatch.setattr("src.collect.proxy.time.sleep", fake.sleep)
+
+    return fake
