@@ -1,6 +1,8 @@
 import threading
 import pytest
 
+from src.collect.proxy import ProxyRateLimiter
+
 
 class FakeClock:
     def __init__(self, start=0.0):
@@ -38,3 +40,12 @@ def proxies():
         {"http": f"http://proxy{i}:8080", "https": f"http://proxy{i}:8080"}
         for i in range(3)
     ]
+
+
+def test_when_under_limit_then_does_not_sleep(clock):
+    limiter = ProxyRateLimiter(max_requests=3, sliding_window=1.0)
+
+    for _ in range(3):
+        limiter.wait_for_slot()
+
+    assert clock.sleeps == []
