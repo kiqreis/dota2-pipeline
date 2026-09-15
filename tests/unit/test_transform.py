@@ -1,6 +1,12 @@
 import pytest
 
 from src.collect.matches_details import sanitize_for_mongo
+from src.process.transform import MatchDetailsProcessor
+
+
+@pytest.fixture
+def processor():
+    return MatchDetailsProcessor(collection=None)
 
 
 def test_when_sanitize_is_normal_then_returns_unchanged():
