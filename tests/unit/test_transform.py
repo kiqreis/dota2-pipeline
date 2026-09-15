@@ -14,3 +14,10 @@ def test_when_integer_exceeds_mongo_limit_then_converts_to_string():
     result = sanitize_for_mongo(data)
 
     assert result["value"] == "9223372036854775808"
+
+
+def test_when_nested_integer_exceeds_mongo_limit_then_converts_to_string():
+    data = {"outer": {"inner": 9223372036854775808}}
+    result = sanitize_for_mongo(data)
+
+    assert result["outer"]["inner"] == "9223372036854775808"
