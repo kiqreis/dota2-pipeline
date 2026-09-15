@@ -8,7 +8,8 @@ import requests
 from sqlalchemy import select
 
 from src.collect.proxy import ProxyRouter
-from src.shared.settings import Settings, RateLimitException
+from src.shared.settings import Settings
+from src.shared.exceptions import RateLimitException
 from src.collect.models import Match
 from src.db.session import get_session
 
