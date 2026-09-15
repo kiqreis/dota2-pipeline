@@ -143,3 +143,8 @@ def match_details_factory():
 @pytest.fixture
 def sample_match(match_factory):
     return match_factory()
+
+
+@pytest.fixture
+def sample_match_details(match_details_factory):
+    return match_details_factory()
