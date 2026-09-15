@@ -18,6 +18,7 @@ URL = "https://api.opendota.com/api/matches"
 
 settings = Settings()
 PROXIES = settings.PROXIES
+MAX_INT = 9223372036854775807
 
 
 def _wait_time(retry_state):
@@ -32,22 +33,16 @@ def _wait_time(retry_state):
 
 
 def sanitize_for_mongo(data):
-    MAX_INT = 9223372036854775807
+    if isinstance(data, bool):
+        return data
+
+    if isinstance(data, int):
+        return str(data) if data > MAX_INT else data
 
     if isinstance(data, dict):
-        sanitized = {}
+        return {k: sanitize_for_mongo(v) for k, v in data.items()}
 
-        for k, v in data.items():
-            sanitized_value = sanitize_for_mongo(v)
-
-            if isinstance(sanitized_value, int) and sanitized_value > MAX_INT:
-                sanitized[k] = str(sanitized_value)
-            else:
-                sanitized[k] = sanitized_value
-
-        return sanitized
-
-    elif isinstance(data, list):
+    if isinstance(data, list):
         return [sanitize_for_mongo(i) for i in data]
 
     return data
