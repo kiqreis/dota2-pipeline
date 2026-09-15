@@ -14,7 +14,7 @@ def settings():
     return Settings()
 
 
-@pytest.fixute(scope="session")
+@pytest.fixture(scope="session")
 def db_engine(settings):
     engine = create_engine(settings.DATABASE_URL, pool_pre_ping=True)
     Base.metadata.create_all(engine)
