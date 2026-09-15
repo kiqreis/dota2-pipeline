@@ -45,3 +45,17 @@ def db_session(db_engine, session_factory):
         session.close()
         transaction.rollback()
         conn.close()
+
+
+@pytest.fixture(scope="session")
+def mongo_client(settings):
+    from pymongo import MongoClient
+
+    client = MongoClient(
+        settings.MONGO_DB_URI,
+        serverSelectionTimeoutMS=2000,
+    )
+
+    yield client
+
+    client.close()
