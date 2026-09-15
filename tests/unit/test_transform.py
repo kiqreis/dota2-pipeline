@@ -29,3 +29,11 @@ def test_when_list_contains_large_integers_then_converts_nested_values():
 
     assert result["values"][1] == "9223372036854775808"
     assert result["values"][2]["x"] == "9223372036854775808"
+
+
+def test_when_integers_are_within_mongo_limit_then_preserves_values():
+    data = {"count": 13, "max_int_valid": 9223372036854775807}
+    result = sanitize_for_mongo(data)
+
+    assert result["count"] == 13
+    assert result["max_int_valid"] == 9223372036854775807
