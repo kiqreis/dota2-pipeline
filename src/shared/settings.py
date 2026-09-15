@@ -15,3 +15,4 @@ class Settings(BaseSettings):
     AWS_SECRET_KEY: str
     AWS_REGION: str
     WINDOW_SECONDS: float = 60.0
+    MAX_REQUESTS_PER_MINUTE: int = 60

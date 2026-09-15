@@ -18,8 +18,6 @@ URL = "https://api.opendota.com/api/matches"
 settings = Settings()
 PROXIES = settings.PROXIES
 
-MAX_REQUESTS_PER_MINUTE = 60
-
 
 def _wait_time(retry_state):
     exec = retry_state.outcome.exception()
@@ -57,7 +55,7 @@ def sanitize_for_mongo(data):
 class CollectorMatchDetails:
     def __init__(self, mongo_collection, max_workers):
         self.mongo_collection = mongo_collection
-        self.proxies = ProxyRouter(PROXIES, MAX_REQUESTS_PER_MINUTE)
+        self.proxies = ProxyRouter(PROXIES, settings.MAX_REQUESTS_PER_MINUTE)
         self.max_workers = max_workers or max(1, len(PROXIES) * 2)
 
     def get_matches_to_collect(self):
