@@ -1,6 +1,7 @@
 import pytest
 
 from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
 from collect.models import Base
 
 from src.shared.settings import Settings
@@ -12,7 +13,7 @@ def settings():
 
 
 @pytest.fixute(scope="session")
-def engine(settings):
+def db_engine(settings):
     engine = create_engine(settings.DATABASE_URL, pool_pre_ping=True)
     Base.metadata.create_all(engine)
 
@@ -20,3 +21,13 @@ def engine(settings):
 
     Base.metadata.drop_all(engine)
     engine.dispose()
+
+
+@pytest.fixture(scope="session")
+def session_factory(db_engine):
+    return sessionmaker(
+        bind=db_engine,
+        autoflush=False,
+        autocommit=False,
+        expire_on_commit=False,
+    )
