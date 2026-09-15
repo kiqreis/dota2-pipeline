@@ -75,3 +75,31 @@ def mongo_collection(mongo_client, settings):
         yield collection
     finally:
         db.drop_collection(collection_name)
+
+
+@pytest.fixture
+def match_factory():
+    def _make(**overrides):
+        data = {
+            "match_id": 9999999999,
+            "duration": 2400,
+            "start_time": 1700000000,
+            "radiant_team_id": 12345,
+            "radiant_name": "Team Radiant",
+            "dire_team_id": 67890,
+            "dire_name": "Team Dire",
+            "leagueid": 1234,
+            "league_name": "Test League",
+            "series_id": 1,
+            "series_type": 1,
+            "radiant_score": 30,
+            "dire_score": 20,
+            "radiant_win": True,
+            "version": 1,
+        }
+
+        data.update(overrides)
+
+        return data
+
+    return _make
