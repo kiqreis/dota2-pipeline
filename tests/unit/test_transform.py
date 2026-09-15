@@ -1,10 +1,9 @@
-import pytest
-
 import pandas as pd
+import pytest
+from pandas.api.types import is_string_dtype
 
 from src.collect.matches_details import sanitize_for_mongo
 from src.process.transform import MatchDetailsProcessor
-from pandas.api.types import is_string_dtype
 
 
 @pytest.fixture
@@ -191,7 +190,7 @@ def test_when_match_details_missing_columns_become_none(processor, column):
 
 
 @pytest.mark.parametrize("column", ["radiant_logo", "dire_logo"])
-def test_extract_match_details_missing_logo_columns_become_na(processor, column):
+def test_when_logo_columns_are_missing_then_become_pd_na(processor, column):
     df = processor.extract_match_details({})
 
     assert pd.isna(df[column].iloc[0])
