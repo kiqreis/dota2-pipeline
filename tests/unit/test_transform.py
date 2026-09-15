@@ -170,3 +170,11 @@ def test_when_match_details_are_extracted_then_values_map_correctly(
     df = processor.extract_match_details(full_match_payload)
 
     assert df[column].iloc[0] == full_match_payload[column]
+
+
+def test_when_match_details_extracted_then_radiant_win_is_boolean_true(
+    processor, full_match_payload
+):
+    df = processor.extract_match_details(full_match_payload)
+
+    assert df["radiant_win"].iloc[0].item() is True
