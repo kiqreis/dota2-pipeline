@@ -31,3 +31,17 @@ def session_factory(db_engine):
         autocommit=False,
         expire_on_commit=False,
     )
+
+
+@pytest.fixture(scope="session")
+def db_session(db_engine, session_factory):
+    conn = db_engine.connect()
+    transaction = conn.begin()
+    session = session_factory(bind=conn)
+
+    try:
+        yield session
+    finally:
+        session.close()
+        transaction.rollback()
+        conn.close()
