@@ -178,3 +178,13 @@ def test_when_match_details_extracted_then_radiant_win_is_boolean_true(
     df = processor.extract_match_details(full_match_payload)
 
     assert df["radiant_win"].iloc[0].item() is True
+
+
+@pytest.mark.parametrize(
+    "column",
+    ["match_id", "radiant_win", "duration", "radiant_name"],
+)
+def test_when_match_details_missing_columns_become_none(processor, column):
+    df = processor.extract_match_details({})
+
+    assert df[column].iloc[0] is None
