@@ -4,6 +4,7 @@ import pandas as pd
 
 from src.collect.matches_details import sanitize_for_mongo
 from src.process.transform import MatchDetailsProcessor
+from pandas.api.types import is_string_dtype
 
 
 @pytest.fixture
@@ -133,3 +134,20 @@ def test_when_match_has_no_players_then_returns_empty_dataframe(processor):
     assert "hero_id" in df.columns
     assert "match_id" in df.columns
     assert df.index.empty
+
+
+def test_when_match_details_are_sanitized_then_large_ints_converted_to_strings(
+    processor, full_match_payload
+):
+    payload = {
+        **full_match_payload,
+        "radiant_logo": 12345,
+        "dire_logo": None,
+    }
+
+    df = processor.extract_match_details(payload)
+
+    assert is_string_dtype(df["radiant_logo"])
+    assert is_string_dtype(df["dire_logo"])
+    assert df["radiant_logo"].iloc[0] == "12345"
+    assert pd.isna(df["dire_logo"].iloc[0])
