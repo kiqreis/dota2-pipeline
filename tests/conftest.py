@@ -1,3 +1,5 @@
+import uuid
+
 import pytest
 
 from sqlalchemy import create_engine
@@ -59,3 +61,17 @@ def mongo_client(settings):
     yield client
 
     client.close()
+
+
+@pytest.fixture
+def mongo_collection(mongo_client, settings):
+    db = mongo_client[settings.MONGO_DB_NAME]
+
+    collection_name = f"match_details_test_{uuid.uuid4().hex}"
+    collection = db[collection_name]
+    collection.create_index("match_id", unique=True)
+
+    try:
+        yield collection
+    finally:
+        db.drop_collection(collection_name)
