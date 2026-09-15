@@ -188,3 +188,11 @@ def test_when_match_details_missing_columns_become_none(processor, column):
     df = processor.extract_match_details({})
 
     assert df[column].iloc[0] is None
+
+
+@pytest.mark.parametrize("column", ["radiant_logo", "dire_logo"])
+def test_extract_match_details_missing_logo_columns_become_na(processor, column):
+    df = processor.extract_match_details({})
+
+    assert pd.isna(df[column].iloc[0])
+    assert df[column].iloc[0] is not None
