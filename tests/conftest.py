@@ -106,5 +106,40 @@ def match_factory():
 
 
 @pytest.fixture
+def match_details_factory():
+    def _make(**overrides):
+        data = {
+            "match_id": 9999999999,
+            "version": 1,
+            "radiant_win": True,
+            "duration": 2400,
+            "start_time": 1700000000,
+            "radiant_name": "Team Radiant",
+            "dire_name": "Team Dire",
+            "players": [
+                {
+                    "player_slot": 0,
+                    "account_id": 111,
+                    "hero_id": 1,
+                    "kills": 10,
+                    "deaths": 2,
+                    "assists": 15,
+                    "gold_per_min": 500,
+                    "xp_per_min": 600,
+                    "isRadiant": True,
+                    "win": True,
+                    "lose": False,
+                }
+            ],
+        }
+
+        data.update(overrides)
+
+        return data
+
+    return _make
+
+
+@pytest.fixture
 def sample_match(match_factory):
     return match_factory()
