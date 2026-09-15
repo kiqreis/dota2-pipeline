@@ -109,3 +109,14 @@ def test_when_match_fields_are_missing_then_fills_values_with_none(processor):
     assert isinstance(df, pd.DataFrame)
     assert pd.isna(df["match_id"].iloc[0])
     assert df.isnull().all().all()
+
+
+def test_when_match_has_players_then_returns_player_dataframe(
+    processor, sample_match_details
+):
+    df = processor.extract_players_details(sample_match_details)
+
+    assert len(df) == 1
+    assert df["match_id"].iloc[0] == sample_match_details["match_id"]
+    assert df["kills"].iloc[0] == 10
+    assert df["account_id"].iloc[0] == 111
