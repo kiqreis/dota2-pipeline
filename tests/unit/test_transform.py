@@ -151,3 +151,22 @@ def test_when_match_details_are_sanitized_then_large_ints_converted_to_strings(
     assert is_string_dtype(df["dire_logo"])
     assert df["radiant_logo"].iloc[0] == "12345"
     assert pd.isna(df["dire_logo"].iloc[0])
+
+
+@pytest.mark.parametrize(
+    "column",
+    [
+        "match_id",
+        "duration",
+        "start_time",
+        "radiant_score",
+        "dire_score",
+        "radiant_name",
+    ],
+)
+def test_when_match_details_are_extracted_then_values_map_correctly(
+    processor, full_match_payload, column
+):
+    df = processor.extract_match_details(full_match_payload)
+
+    assert df[column].iloc[0] == full_match_payload[column]
