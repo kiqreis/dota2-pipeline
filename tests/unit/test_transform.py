@@ -9,6 +9,49 @@ def processor():
     return MatchDetailsProcessor(collection=None)
 
 
+@pytest.fixture
+def payload():
+    return {
+        "match_id": 1,
+        "version": 1,
+        "radiant_win": True,
+        "duration": 1234,
+        "start_time": 1700000000,
+        "radiant_name": "Team Radiant",
+        "dire_name": "Team Dire",
+        "leagueid": 123,
+        "series_id": 1,
+        "series_type": 1,
+        "radiant_score": 30,
+        "dire_score": 20,
+        "cluster": 1,
+        "replay_salt": 1,
+        "pre_game_duration": 0,
+        "match_seq_num": 1,
+        "tower_status_radiant": 0,
+        "tower_status_dire": 0,
+        "barracks_status_radiant": 0,
+        "barracks_status_dire": 0,
+        "first_blood_time": 0,
+        "lobby_type": 0,
+        "human_players": 10,
+        "game_mode": 1,
+        "flags": 0,
+        "engine": 1,
+        "radiant_team_id": 1,
+        "radiant_logo": None,
+        "radiant_team_complete": 0,
+        "dire_team_id": 2,
+        "dire_logo": None,
+        "dire_team_complete": 0,
+        "radiant_captain": 0,
+        "dire_captain": 0,
+        "replay_url": "",
+        "patch": 1,
+        "region": 0,
+    }
+
+
 def test_when_sanitize_is_normal_then_returns_unchanged():
     data = {"match_id": 12345, "name": "test_12345"}
 
