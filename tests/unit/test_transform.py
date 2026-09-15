@@ -1,5 +1,7 @@
 import pytest
 
+import pandas as pd
+
 from src.collect.matches_details import sanitize_for_mongo
 from src.process.transform import MatchDetailsProcessor
 
@@ -97,3 +99,13 @@ def test_when_match_payload_is_complete_then_returns_expected_columns(
     assert "radiant_win" in df.columns
     assert "leagueid" in df.columns
     assert len(df) == 1
+
+
+def test_when_match_fields_are_missing_then_fills_values_with_none(processor):
+    df = processor.extract_match_details({})
+
+    assert len(df) == 1
+    assert df is not None
+    assert isinstance(df, pd.DataFrame)
+    assert pd.isna(df["match_id"].iloc[0])
+    assert df.isnull().all().all()
