@@ -21,3 +21,11 @@ def test_when_nested_integer_exceeds_mongo_limit_then_converts_to_string():
     result = sanitize_for_mongo(data)
 
     assert result["outer"]["inner"] == "9223372036854775808"
+
+
+def test_when_list_contains_large_integers_then_converts_nested_values():
+    data = {"values": [1, 9223372036854775808, {"x": 9223372036854775808}]}
+    result = sanitize_for_mongo(data)
+
+    assert result["values"][1] == "9223372036854775808"
+    assert result["values"][2]["x"] == "9223372036854775808"
