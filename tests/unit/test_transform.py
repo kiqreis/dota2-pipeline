@@ -86,3 +86,14 @@ def test_when_integers_are_within_mongo_limit_then_preserves_values():
 
     assert result["count"] == 13
     assert result["max_int_valid"] == 9223372036854775807
+
+
+def test_when_match_payload_is_complete_then_returns_expected_columns(
+    processor, payload
+):
+    df = processor.extract_match_details(payload)
+
+    assert "match_id" in df.columns
+    assert "radiant_win" in df.columns
+    assert "leagueid" in df.columns
+    assert len(df) == 1
