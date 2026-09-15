@@ -103,3 +103,8 @@ def match_factory():
         return data
 
     return _make
+
+
+@pytest.fixture
+def sample_match(match_factory):
+    return match_factory()
