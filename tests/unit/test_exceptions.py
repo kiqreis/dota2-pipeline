@@ -32,3 +32,11 @@ def test_when_custom_message_then_exact_string():
     ex = RateLimitException(retry_after=30)
 
     assert str(ex) == "Rate limit exceeded. Retry after 30 seconds"
+
+
+def test_when_raised_then_can_be_catch():
+    with pytest.raises(RateLimitException) as ex_info:
+        raise RateLimitException(retry_after=10)
+
+    assert ex_info.value.retry_after == 10
+    assert str(ex_info.value) == "Rate limit exceeded. Retry after 10 seconds"
