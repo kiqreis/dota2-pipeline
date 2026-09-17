@@ -20,3 +20,9 @@ def test_when_is_passed_custom_retry_after_then_value_and_message_are_set():
 def test_when_catch_as_app_base_then_succeeds():
     with pytest.raises(AppBaseException):
         raise RateLimitException()
+
+
+def test_when_default_message_then_exact_string():
+    ex = RateLimitException()
+
+    assert str(ex) == f"Rate limit exceeded. Retry after {ex.retry_after} seconds"
