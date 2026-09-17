@@ -7,14 +7,14 @@ def test_when_no_passed_retry_after_then_default_is_5():
     ex = RateLimitException()
 
     assert ex.retry_after == 5
-    assert f"{ex.retry_after} seconds" in str(ex)
+    assert "5 seconds" in str(ex)
 
 
 def test_when_is_passed_custom_retry_after_then_value_and_message_are_set():
     ex = RateLimitException(retry_after=30)
 
     assert ex.retry_after == 30
-    assert f"{ex.retry_after} seconds" in str(ex)
+    assert "30 seconds" in str(ex)
 
 
 def test_when_catch_as_app_base_then_succeeds():
@@ -25,4 +25,10 @@ def test_when_catch_as_app_base_then_succeeds():
 def test_when_default_message_then_exact_string():
     ex = RateLimitException()
 
-    assert str(ex) == f"Rate limit exceeded. Retry after {ex.retry_after} seconds"
+    assert str(ex) == "Rate limit exceeded. Retry after 5 seconds"
+
+
+def test_when_custom_message_then_exact_string():
+    ex = RateLimitException(retry_after=30)
+
+    assert str(ex) == "Rate limit exceeded. Retry after 30 seconds"
