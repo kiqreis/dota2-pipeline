@@ -1,4 +1,6 @@
-from src.shared.exceptions import RateLimitException
+import pytest
+
+from src.shared.exceptions import AppBaseException, RateLimitException
 
 
 def test_when_no_passed_retry_after_then_default_is_5():
@@ -13,3 +15,8 @@ def test_when_is_passed_custom_retry_after_then_value_and_message_are_set():
 
     assert ex.retry_after == 30
     assert f"{ex.retry_after} seconds" in str(ex)
+
+
+def test_when_catch_as_app_base_then_succeeds():
+    with pytest.raises(AppBaseException):
+        raise RateLimitException()
