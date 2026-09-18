@@ -5,6 +5,7 @@ import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from collect.models import Base
+from testcontainers.community.postgres import PostgresContainer
 
 from src.shared.settings import Settings
 
@@ -15,14 +16,15 @@ def settings():
 
 
 @pytest.fixture(scope="session")
-def db_engine(settings):
-    engine = create_engine(settings.DATABASE_URL, pool_pre_ping=True)
-    Base.metadata.create_all(engine)
+def db_engine():
+    with PostgresContainer("postgres:16", driver="psycopg") as postgres:
+        _engine = create_engine(postgres.get_connection_url(), pool_pre_ping=True)
+        Base.metadata.create_all(_engine)
 
-    yield engine
+        yield _engine
 
-    Base.metadata.drop_all(engine)
-    engine.dispose()
+        Base.metadata.drop_all(_engine)
+        _engine.dispose()
 
 
 @pytest.fixture(scope="session")
