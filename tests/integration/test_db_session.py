@@ -1,6 +1,6 @@
 import pytest
 
-from src.collect.models import Match
+from src.collect.matches import CollectorMatch
 from src.collect.models import Match, get_oldest_match_id
 
 pytestmark = pytest.mark.integration
@@ -29,3 +29,14 @@ def test_when_multiple_matches_exist_then_get_oldest_match_id_returns_earliest(
     db_session.commit()
 
     assert get_oldest_match_id() == oldest_id
+
+
+def test_given_existing_match_when_save_matches_then_skips_duplicate(
+    patch_get_session, db_session, sample_match
+):
+    collector = CollectorMatch()
+
+    collector.save_matches([sample_match])
+    collector.save_matches([sample_match])
+
+    assert db_session.query(Match).count() == 1
