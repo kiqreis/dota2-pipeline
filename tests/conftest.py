@@ -1,3 +1,4 @@
+from contextlib import contextmanager
 import uuid
 
 import pytest
@@ -8,6 +9,7 @@ from collect.models import Base
 from testcontainers.community.postgres import PostgresContainer
 
 from src.shared.settings import Settings
+import src.db.session as session_module
 
 
 @pytest.fixture(scope="session")
@@ -49,6 +51,17 @@ def db_session(db_engine, session_factory):
         session.close()
         transaction.rollback()
         conn.close()
+
+
+@pytest.fixture
+def patch_get_session(monkeypatch, db_session):
+    @contextmanager
+    def fake_session_local():
+        yield db_session
+
+    monkeypatch.setattr(session_module, "SessionLocal", fake_session_local)
+
+    return fake_session_local
 
 
 @pytest.fixture(scope="session")
