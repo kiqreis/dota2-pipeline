@@ -2,11 +2,13 @@ from contextlib import contextmanager
 import uuid
 
 import pytest
+from pymongo import MongoClient
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from collect.models import Base
 from testcontainers.community.postgres import PostgresContainer
+from testcontainers.community.mongodb import MongoContainer
 
 from src.shared.settings import Settings
 import src.db.session as session_module
@@ -65,17 +67,9 @@ def patch_get_session(monkeypatch, db_session):
 
 
 @pytest.fixture(scope="session")
-def mongo_client(settings):
-    from pymongo import MongoClient
-
-    client = MongoClient(
-        settings.MONGO_DB_URI,
-        serverSelectionTimeoutMS=2000,
-    )
-
-    yield client
-
-    client.close()
+def mongo_client():
+    with MongoContainer("mongo:7") as mongo:
+        yield MongoClient(mongo.get_connection_url())
 
 
 @pytest.fixture
