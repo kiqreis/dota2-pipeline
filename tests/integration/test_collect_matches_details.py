@@ -22,3 +22,11 @@ def _fake_proxies(monkeypatch):
 @pytest.fixture
 def collector(mongo_collection):
     return CollectorMatchDetails(mongo_collection, max_workers=1)
+
+
+@pytest.fixture
+def persisted_match(db_session, sample_match):
+    db_session.add(Match(**sample_match))
+    db_session.commit()
+
+    return Match(**sample_match)
