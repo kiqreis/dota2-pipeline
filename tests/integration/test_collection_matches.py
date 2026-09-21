@@ -93,3 +93,28 @@ def test_when_empty_batch_then_saves_nothing(patch_get_session, db_session, mock
     CollectorMatch().collect_matches()
 
     assert db_session.query(Match).count() == 0
+
+
+def test_when_three_matches_returned_then_all_are_saved(
+    patch_get_session, db_session, match_factory, mock_get
+):
+    payload = [
+        match_factory(match_id=10_000_000_001, radiant_win=False, duration=1000),
+        match_factory(match_id=10_000_000_002, radiant_win=True, duration=2000),
+        match_factory(match_id=10_000_000_003, radiant_win=False, duration=3000),
+    ]
+
+    mock_get(payload)
+
+    CollectorMatch().collect_matches()
+
+    rows = db_session.query(Match).order_by(Match.match_id).all()
+    by_id = {r.match_id: r for r in rows}
+
+    assert set(by_id.keys()) == {m["match_id"] for m in payload}
+
+    for match in payload:
+        row = by_id[match["match_id"]]
+
+        assert row.radiant_win == match["radiant_win"]
+        assert row.duration == match["duration"]
