@@ -65,3 +65,19 @@ def test_when_exec_one_succeeds_then_inserts_into_mongo(
     collector.exec_one(persisted_match)
 
     assert mongo_collection.count_documents({"match_id": sample_match["match_id"]}) == 1
+
+
+def test_when_exec_one_succeeds_then_flags_match_as_collected(
+    patch_get_session,
+    http_ok,
+    db_session,
+    persisted_match,
+    collector,
+    sample_match,
+):
+    collector.exec_one(persisted_match)
+
+    db_session.expire_all()
+    updated = db_session.get(Match, sample_match["match_id"])
+
+    assert updated.flag_details_collected is True
