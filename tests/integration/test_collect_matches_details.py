@@ -69,7 +69,7 @@ def test_when_exec_one_succeeds_then_inserts_into_mongo(
 
 def test_when_exec_one_succeeds_then_flags_match_as_collected(
     patch_get_session,
-    http_ok,
+    http_OK,
     db_session,
     persisted_match,
     collector,
@@ -81,3 +81,9 @@ def test_when_exec_one_succeeds_then_flags_match_as_collected(
     updated = db_session.get(Match, sample_match["match_id"])
 
     assert updated.flag_details_collected is True
+
+
+def test_when_exec_one_succeeds_then_returns_true(
+    patch_get_session, http_OK, persisted_match, collector
+):
+    assert collector.exec_one(persisted_match) is True
