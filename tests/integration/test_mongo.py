@@ -15,3 +15,13 @@ def test_when_collection_created_then_match_id_index_is_unique(mongo_collection)
 
     assert index is not None
     assert index["unique"] is True
+
+
+def test_when_insert_then_can_find_by_match_id(mongo_collection, sample_match_details):
+    result = mongo_collection.insert_one(sample_match_details)
+    found = mongo_collection.find_one({"match_id": sample_match_details["match_id"]})
+
+    assert result.inserted_id is not None
+    assert found is not None
+    assert found["radiant_win"] is True
+    assert found["radiant_name"] == "Team Radiant"
