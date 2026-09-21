@@ -41,3 +41,14 @@ def http_OK(sample_match_details):
 
     with patch("requests.get", return_value=response) as mock_get:
         yield mock_get
+
+
+def test_when_exec_one_succeeds_then_calls_api_with_match_url(
+    patch_get_session, http_OK, persisted_match, collector, sample_match
+):
+    collector.exec_one(persisted_match)
+
+    http_OK.assert_called_once()
+
+    assert http_OK.call_args.args[0].endswith(f"/{sample_match['match_id']}")
+    assert http_OK.call_args.kwargs["timeout"] == 30
