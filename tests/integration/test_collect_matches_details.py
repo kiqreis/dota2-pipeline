@@ -1,7 +1,9 @@
+from unittest.mock import MagicMock
+
 import pytest
 
 from src.collect.matches_details import CollectorMatchDetails
-from src.collect.models import Match
+from src.collect.models import Match, patch
 
 pytestmark = pytest.mark.integration
 
@@ -30,3 +32,12 @@ def persisted_match(db_session, sample_match):
     db_session.commit()
 
     return Match(**sample_match)
+
+
+@pytest.fixture
+def http_OK(sample_match_details):
+    response = MagicMock(status_code=200)
+    response.json.return_value = sample_match_details
+
+    with patch("requests.get", return_value=response) as mock_get:
+        yield mock_get
