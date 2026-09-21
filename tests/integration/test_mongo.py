@@ -36,3 +36,23 @@ def test_when_duplicate_match_id_then_raises_duplicate_key_error(
 
     with pytest.raises(DuplicateKeyError):
         mongo_collection.insert_one(sample_match_details)
+
+
+def test_when_update_one_with_set_then_only_listed_field_changes(
+    mongo_collection, sample_match_details
+):
+    mongo_collection.insert_one(sample_match_details)
+
+    result = mongo_collection.update_one(
+        {"match_id": sample_match_details["match_id"]},
+        {"$set": {"radiant_win": False}},
+    )
+
+    found = mongo_collection.find_one({"match_id": sample_match_details["match_id"]})
+
+    assert result.matched_count == 1
+    assert result.modified_count == 1
+    assert found["radiant_win"] is False
+    assert found["duration"] == sample_match_details["duration"]
+    assert found["version"] == sample_match_details["version"]
+    assert found["players"] == sample_match_details["players"]
