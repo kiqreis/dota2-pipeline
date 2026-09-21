@@ -114,3 +114,18 @@ def test_when_exec_one_gets_non_200_then_returns_false(
     mock_get(sample_match_details, status=404)
 
     assert collector.exec_one(persisted_match) is False
+
+
+def test_when_exec_one_gets_non_200_then_does_not_insert_into_mongo(
+    patch_get_session,
+    collector,
+    mongo_collection,
+    persisted_match,
+    sample_match_details,
+    mock_get,
+):
+    mock_get(sample_match_details, status=404)
+
+    collector.exec_one(persisted_match)
+
+    assert mongo_collection.count_documents({}) == 0
