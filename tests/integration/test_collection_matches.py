@@ -118,3 +118,24 @@ def test_when_three_matches_returned_then_all_are_saved(
 
         assert row.radiant_win == match["radiant_win"]
         assert row.duration == match["duration"]
+
+
+def test_when_match_already_exists_then_skips_insert_and_preserves_data(
+    patch_get_session, db_session, match_factory, mock_get
+):
+    existing = match_factory(match_id=10_000_000_001, radiant_win=False)
+    new = match_factory(match_id=10_000_000_002)
+
+    db_session.add(Match(**existing))
+    db_session.commit()
+
+    incoming_existing = {**existing, "radiant_win": True}
+    mock_get([incoming_existing, new])
+
+    CollectorMatch().collect_matches()
+
+    rows = db_session.query(Match).order_by(Match.match_id).all()
+    match_by_id = {r.match_id: r for r in rows}
+
+    assert set(match_by_id.keys()) == {existing["match_id"], new["match_id"]}
+    assert match_by_id[existing["match_id"]].radiant_win is False
