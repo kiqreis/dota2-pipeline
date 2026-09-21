@@ -169,3 +169,12 @@ def test_when_get_matches_to_collect_then_returns_only_uncollected(
     matches = collector.get_matches_to_collect()
 
     assert [m.match_id for m in matches] == [sample_match["match_id"]]
+
+
+def test_when_no_uncollected_matches_then_returns_empty(
+    patch_get_session, db_session, collector, sample_match
+):
+    db_session.add(Match(**{**sample_match, "flag_details_collected": True}))
+    db_session.commit()
+
+    assert collector.get_matches_to_collect() == []
