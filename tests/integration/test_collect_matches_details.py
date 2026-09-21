@@ -148,3 +148,24 @@ def test_when_exec_one_gets_non_200_then_does_not_flag_match(
     not_manipulated = db_session.get(Match, sample_match["match_id"])
 
     assert not_manipulated.flag_details_collected is False
+
+
+def test_when_get_matches_to_collect_then_returns_only_uncollected(
+    patch_get_session, db_session, collector, sample_match, match_factory
+):
+    db_session.add(Match(**sample_match))
+
+    db_session.add(
+        Match(
+            **match_factory(
+                match_id=10_000_000_002,
+                flag_details_collected=True,
+            )
+        )
+    )
+
+    db_session.commit()
+
+    matches = collector.get_matches_to_collect()
+
+    assert [m.match_id for m in matches] == [sample_match["match_id"]]
