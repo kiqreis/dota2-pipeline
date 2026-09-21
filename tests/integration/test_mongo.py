@@ -38,6 +38,10 @@ def test_when_duplicate_match_id_then_raises_duplicate_key_error(
         mongo_collection.insert_one(sample_match_details)
 
 
+def test_when_find_unknown_match_id_then_returns_none(mongo_collection):
+    assert mongo_collection.find_one({"match_id": 1}) is None
+
+
 def test_when_update_one_with_set_then_only_listed_field_changes(
     mongo_collection, sample_match_details
 ):
