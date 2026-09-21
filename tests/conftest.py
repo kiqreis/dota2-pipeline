@@ -5,7 +5,7 @@ import pytest
 from pymongo import MongoClient
 
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import Session, sessionmaker
 from collect.models import Base
 from testcontainers.community.postgres import PostgresContainer
 from testcontainers.community.mongodb import MongoContainer
@@ -41,11 +41,11 @@ def session_factory(db_engine):
     )
 
 
-@pytest.fixture(scope="session")
-def db_session(db_engine, session_factory):
+@pytest.fixture
+def db_session(db_engine):
     conn = db_engine.connect()
     transaction = conn.begin()
-    session = session_factory(bind=conn)
+    session = Session(bind=conn, join_transaction_mode="create_savepoint")
 
     try:
         yield session
