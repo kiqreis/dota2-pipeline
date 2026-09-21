@@ -1,5 +1,7 @@
 import pytest
 
+from pymongo.errors import DuplicateKeyError
+
 pytestmark = pytest.mark.integration
 
 
@@ -25,3 +27,12 @@ def test_when_insert_then_can_find_by_match_id(mongo_collection, sample_match_de
     assert found is not None
     assert found["radiant_win"] is True
     assert found["radiant_name"] == "Team Radiant"
+
+
+def test_when_duplicate_match_id_then_raises_duplicate_key_error(
+    mongo_collection, sample_match_details
+):
+    mongo_collection.insert_one(sample_match_details)
+
+    with pytest.raises(DuplicateKeyError):
+        mongo_collection.insert_one(sample_match_details)
