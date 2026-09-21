@@ -1,10 +1,9 @@
-from unittest.mock import MagicMock, Mock
-
 import pytest
 import requests
 
+from unittest.mock import MagicMock, Mock, patch
 from src.collect.matches_details import CollectorMatchDetails
-from src.collect.models import Match, patch
+from src.collect.models import Match
 
 pytestmark = pytest.mark.integration
 
