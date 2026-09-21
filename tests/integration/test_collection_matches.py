@@ -67,3 +67,21 @@ def test_when_http_error_then_returns_false_and_saves_nothing(
 
     assert result is False
     assert db_session.query(Match).count() == 0
+
+
+def test_when_match_already_exists_then_skips_insert(
+    patch_get_session, db_session, match_factory, mock_get
+):
+    existing_matches = match_factory(radiant_win=False)
+
+    db_session.add(Match(**existing_matches))
+    db_session.commit()
+
+    incoming = match_factory(radiant_win=True)
+    mock_get([incoming])
+
+    CollectorMatch().collect_matches()
+    rows = db_session.query(Match).all()
+
+    assert len(rows) == 1
+    assert rows[0].radiant_win is False
