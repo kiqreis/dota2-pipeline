@@ -85,3 +85,11 @@ def test_when_match_already_exists_then_skips_insert(
 
     assert len(rows) == 1
     assert rows[0].radiant_win is False
+
+
+def test_when_empty_batch_then_saves_nothing(patch_get_session, db_session, mock_get):
+    mock_get([])
+
+    CollectorMatch().collect_matches()
+
+    assert db_session.query(Match).count() == 0
