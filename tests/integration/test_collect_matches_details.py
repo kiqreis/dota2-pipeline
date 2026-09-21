@@ -102,3 +102,15 @@ def test_when_exec_one_succeeds_then_returns_true(
     patch_get_session, http_OK, persisted_match, collector
 ):
     assert collector.exec_one(persisted_match) is True
+
+
+def test_when_exec_one_gets_non_200_then_returns_false(
+    patch_get_session,
+    collector,
+    persisted_match,
+    sample_match_details,
+    mock_get,
+):
+    mock_get(sample_match_details, status=404)
+
+    assert collector.exec_one(persisted_match) is False
