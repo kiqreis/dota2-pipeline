@@ -1,5 +1,8 @@
 import pytest
 
+from src.collect.matches_details import CollectorMatchDetails
+from src.collect.models import Match
+
 pytestmark = pytest.mark.integration
 
 
@@ -14,3 +17,8 @@ def _fake_proxies(monkeypatch):
             }
         ],
     )
+
+
+@pytest.fixture
+def collector(mongo_collection):
+    return CollectorMatchDetails(mongo_collection, max_workers=1)
