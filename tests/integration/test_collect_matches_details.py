@@ -129,3 +129,22 @@ def test_when_exec_one_gets_non_200_then_does_not_insert_into_mongo(
     collector.exec_one(persisted_match)
 
     assert mongo_collection.count_documents({}) == 0
+
+
+def test_when_exec_one_gets_non_200_then_does_not_flag_match(
+    patch_get_session,
+    db_session,
+    collector,
+    persisted_match,
+    sample_match,
+    sample_match_details,
+    mock_get,
+):
+    mock_get(sample_match_details, status=404)
+
+    collector.exec_one(persisted_match)
+
+    db_session.expire_all()
+    not_manipulated = db_session.get(Match, sample_match["match_id"])
+
+    assert not_manipulated.flag_details_collected is False
