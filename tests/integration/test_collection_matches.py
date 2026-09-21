@@ -57,3 +57,13 @@ def test_when_collecting_then_calls_api_with_timeout(
 
     assert requests.get.call_count == 1
     assert requests.get.call_args.kwargs["timeout"] == 30
+
+
+def test_when_http_error_then_returns_false_and_saves_nothing(
+    patch_get_session, db_session, mock_get
+):
+    mock_get([], status=500)
+    result = CollectorMatch().collect_matches()
+
+    assert result is False
+    assert db_session.query(Match).count() == 0
