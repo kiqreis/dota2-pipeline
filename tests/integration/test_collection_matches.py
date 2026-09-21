@@ -2,6 +2,8 @@ import pytest
 import requests
 
 from unittest.mock import Mock
+from src.collect.models import Match
+from collect.matches import CollectorMatch
 
 pytestmark = pytest.mark.integration
 
@@ -31,3 +33,16 @@ def mock_get(monkeypatch):
         return mock
 
     return _mock
+
+
+def test_when_http_200_then_persists_matches_and_returns_true(
+    patch_get_session, db_session, match_factory, mock_get
+):
+    payload = [match_factory()]
+    mock_get(payload)
+
+    result = CollectorMatch().collect_matches()
+    rows = db_session.query(Match).all()
+
+    assert result is True
+    assert [r.match_id for r in rows] == [m["match_id"] for m in payload]
