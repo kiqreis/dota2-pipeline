@@ -1,14 +1,12 @@
-from contextlib import contextmanager
 import uuid
-
 import pytest
-from pymongo import MongoClient
 
+from contextlib import contextmanager
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, sessionmaker
 from collect.models import Base
 from testcontainers.community.postgres import PostgresContainer
-from testcontainers.community.mongodb import MongoContainer
+from testcontainers.community.mongodb import MongoDbContainer
 
 from src.shared.settings import Settings
 import src.db.session as session_module
@@ -68,8 +66,12 @@ def patch_get_session(monkeypatch, db_session):
 
 @pytest.fixture(scope="session")
 def mongo_client():
-    with MongoContainer("mongo:7") as mongo:
-        yield MongoClient(mongo.get_connection_url())
+    with MongoDbContainer("mongo:7") as mongo:
+        client = mongo.get_connection_client()
+        try:
+            yield client
+        finally:
+            client.close()
 
 
 @pytest.fixture
